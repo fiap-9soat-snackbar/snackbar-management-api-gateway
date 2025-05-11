@@ -21,7 +21,8 @@ resource "aws_apigatewayv2_authorizer" "jwt_auth" {
   authorizer_type  = "REQUEST"
   identity_sources = ["$request.header.Authorization"]
 
-  authorizer_uri = data.terraform_remote_state.lambda.outputs.lambda_authorizer_invoke_arn
+  # authorizer_uri = data.terraform_remote_state.lambda.outputs.lambda_authorizer_invoke_arn
+  authorizer_uri = var.lambda_authorizer_invoke_arn
 
   authorizer_payload_format_version = "2.0"
   enable_simple_responses           = true
@@ -286,7 +287,8 @@ resource "aws_apigatewayv2_route" "api_route_delete_product" {
 
 resource "aws_lambda_permission" "api_gateway_lambda" {
   action        = "lambda:InvokeFunction"
-  function_name = data.terraform_remote_state.lambda.outputs.aws_lambda_function_name
+  # function_name = data.terraform_remote_state.lambda.outputs.aws_lambda_function_name
+  function_name = element(split("/", element(split(":", var.lambda_authorizer_invoke_arn), 5)), 1)
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.snackbar_management_api.execution_arn}/*/*"
 }
