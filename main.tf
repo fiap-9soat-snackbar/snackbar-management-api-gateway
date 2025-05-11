@@ -3,9 +3,16 @@
 #--------------------------------------------------------------
 
 resource "aws_apigatewayv2_api" "snackbar_management_api" {
-  name          = "${data.terraform_remote_state.global.outputs.project_name}-api"
+  name          = "${local.project_name}-api"
+  # name          = "${data.terraform_remote_state.global.outputs.project_name}-api"
   description   = "Snackbar Management HTTP API Gateway"
   protocol_type = "HTTP"
+  
+  tags = {
+    Name        = "${local.project_name}-api"
+    Environment = local.environment
+    Project     = local.project_name
+  }
 }
 
 resource "aws_apigatewayv2_authorizer" "jwt_auth" {
@@ -23,6 +30,12 @@ resource "aws_apigatewayv2_authorizer" "jwt_auth" {
 resource "aws_cloudwatch_log_group" "snackbar_management_api_log_group" {
   name = "/aws/apigateway/${aws_apigatewayv2_api.snackbar_management_api.name}"
   retention_in_days = 30
+  
+  tags = {
+    Name        = "${local.project_name}-api-logs"
+    Environment = local.environment
+    Project     = local.project_name
+  }
 }
 
 resource "aws_apigatewayv2_stage" "default" {
