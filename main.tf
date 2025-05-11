@@ -1,11 +1,15 @@
-resource "aws_apigatewayv2_api" "snackbar_management_management_api" {
+#--------------------------------------------------------------
+# API Gateway Resources for Snackbar Management
+#--------------------------------------------------------------
+
+resource "aws_apigatewayv2_api" "snackbar_management_api" {
   name          = "${data.terraform_remote_state.global.outputs.project_name}-api"
   description   = "Snackbar Management HTTP API Gateway"
   protocol_type = "HTTP"
 }
 
 resource "aws_apigatewayv2_authorizer" "jwt_auth" {
-  api_id           = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id           = aws_apigatewayv2_api.snackbar_management_api.id
   name             = "lambda-authorizer"
   authorizer_type  = "REQUEST"
   identity_sources = ["$request.header.Authorization"]
@@ -16,48 +20,53 @@ resource "aws_apigatewayv2_authorizer" "jwt_auth" {
   enable_simple_responses           = true
 }
 
-resource "aws_cloudwatch_log_group" "snackbar_management_management_api_log_group" {
-  name = "/aws/apigateway/${aws_apigatewayv2_api.snackbar_management_management_api.name}"
+resource "aws_cloudwatch_log_group" "snackbar_management_api_log_group" {
+  name = "/aws/apigateway/${aws_apigatewayv2_api.snackbar_management_api.name}"
   retention_in_days = 30
 }
 
 resource "aws_apigatewayv2_stage" "default" {
-  api_id = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id = aws_apigatewayv2_api.snackbar_management_api.id
   name   = "$default"
   auto_deploy = true
   access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.snackbar_management_management_api_log_group.arn
+    destination_arn = aws_cloudwatch_log_group.snackbar_management_api_log_group.arn
     format = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId"
   }
 }
 
-# Health check endpoint
-resource "aws_apigatewayv2_integration" "snackbar_management_management_get_health" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+#--------------------------------------------------------------
+# Health Check Endpoint
+#--------------------------------------------------------------
+
+resource "aws_apigatewayv2_integration" "snackbar_management_get_health" {
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "GET"
   integration_uri        = "http://${var.alb_dns_name}/actuator/health"
 }
 
 resource "aws_apigatewayv2_route" "api_route_get_health" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "GET /health"
-  target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_management_get_health.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_health.id}"
   authorization_type = "NONE"
 }
 
+#--------------------------------------------------------------
 # IAM Authentication Endpoints
+#--------------------------------------------------------------
 
 # User signup endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_post_signup" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "POST"
   integration_uri        = "http://${var.alb_dns_name}/api/user/auth/signup"
 }
 
 resource "aws_apigatewayv2_route" "api_route_post_signup" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "POST /signup"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_post_signup.id}"
   authorization_type = "NONE"
@@ -65,31 +74,33 @@ resource "aws_apigatewayv2_route" "api_route_post_signup" {
 
 # User login endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_post_login" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "POST"
   integration_uri        = "http://${var.alb_dns_name}/api/user/auth/login"
 }
 
 resource "aws_apigatewayv2_route" "api_route_post_login" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "POST /login"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_post_login.id}"
   authorization_type = "NONE"
 }
 
+#--------------------------------------------------------------
 # User Management Endpoints
+#--------------------------------------------------------------
 
 # Get all users endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_get_users" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "GET"
   integration_uri        = "http://${var.alb_dns_name}/api/user/"
 }
 
 resource "aws_apigatewayv2_route" "api_route_get_users" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "GET /users"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_users.id}"
   authorization_type = "CUSTOM"
@@ -98,14 +109,14 @@ resource "aws_apigatewayv2_route" "api_route_get_users" {
 
 # Get user by CPF endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_get_user_by_cpf" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "GET"
   integration_uri        = "http://${var.alb_dns_name}/api/user/cpf/{cpf}"
 }
 
 resource "aws_apigatewayv2_route" "api_route_get_user_by_cpf" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "GET /users/cpf/{cpf}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_user_by_cpf.id}"
   authorization_type = "CUSTOM"
@@ -114,14 +125,14 @@ resource "aws_apigatewayv2_route" "api_route_get_user_by_cpf" {
 
 # Update user endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_put_user" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "PUT"
   integration_uri        = "http://${var.alb_dns_name}/api/user/{id}"
 }
 
 resource "aws_apigatewayv2_route" "api_route_put_user" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "PUT /users/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_put_user.id}"
   authorization_type = "CUSTOM"
@@ -130,32 +141,34 @@ resource "aws_apigatewayv2_route" "api_route_put_user" {
 
 # Delete user endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_delete_user" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "DELETE"
   integration_uri        = "http://${var.alb_dns_name}/api/user/{id}"
 }
 
 resource "aws_apigatewayv2_route" "api_route_delete_user" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "DELETE /users/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_delete_user.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
 }
 
+#--------------------------------------------------------------
 # Product Endpoints
+#--------------------------------------------------------------
 
 # Create product endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_post_product" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "POST"
   integration_uri        = "http://${var.alb_dns_name}/api/product"
 }
 
 resource "aws_apigatewayv2_route" "api_route_post_product" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "POST /products"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_post_product.id}"
   authorization_type = "CUSTOM"
@@ -164,14 +177,14 @@ resource "aws_apigatewayv2_route" "api_route_post_product" {
 
 # Get all products endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_get_products" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "GET"
   integration_uri        = "http://${var.alb_dns_name}/api/product"
 }
 
 resource "aws_apigatewayv2_route" "api_route_get_products" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "GET /products"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_products.id}"
   authorization_type = "CUSTOM"
@@ -180,14 +193,14 @@ resource "aws_apigatewayv2_route" "api_route_get_products" {
 
 # Get product by ID endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_get_product_by_id" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "GET"
   integration_uri        = "http://${var.alb_dns_name}/api/product/id/{id}"
 }
 
 resource "aws_apigatewayv2_route" "api_route_get_product_by_id" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "GET /products/id/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_product_by_id.id}"
   authorization_type = "CUSTOM"
@@ -196,14 +209,14 @@ resource "aws_apigatewayv2_route" "api_route_get_product_by_id" {
 
 # Get products by category endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_get_products_by_category" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "GET"
   integration_uri        = "http://${var.alb_dns_name}/api/product/category/{category}"
 }
 
 resource "aws_apigatewayv2_route" "api_route_get_products_by_category" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "GET /products/category/{category}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_products_by_category.id}"
   authorization_type = "CUSTOM"
@@ -212,14 +225,14 @@ resource "aws_apigatewayv2_route" "api_route_get_products_by_category" {
 
 # Get product by name endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_get_product_by_name" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "GET"
   integration_uri        = "http://${var.alb_dns_name}/api/product/name/{name}"
 }
 
 resource "aws_apigatewayv2_route" "api_route_get_product_by_name" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "GET /products/name/{name}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_product_by_name.id}"
   authorization_type = "CUSTOM"
@@ -228,14 +241,14 @@ resource "aws_apigatewayv2_route" "api_route_get_product_by_name" {
 
 # Update product endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_put_product" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "PUT"
   integration_uri        = "http://${var.alb_dns_name}/api/product/id/{id}"
 }
 
 resource "aws_apigatewayv2_route" "api_route_put_product" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "PUT /products/id/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_put_product.id}"
   authorization_type = "CUSTOM"
@@ -244,14 +257,14 @@ resource "aws_apigatewayv2_route" "api_route_put_product" {
 
 # Delete product endpoint
 resource "aws_apigatewayv2_integration" "snackbar_management_delete_product" {
-  api_id                 = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id                 = aws_apigatewayv2_api.snackbar_management_api.id
   integration_type       = "HTTP_PROXY"
   integration_method     = "DELETE"
   integration_uri        = "http://${var.alb_dns_name}/api/product/id/{id}"
 }
 
 resource "aws_apigatewayv2_route" "api_route_delete_product" {
-  api_id    = aws_apigatewayv2_api.snackbar_management_management_api.id
+  api_id    = aws_apigatewayv2_api.snackbar_management_api.id
   route_key = "DELETE /products/id/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_delete_product.id}"
   authorization_type = "CUSTOM"
@@ -262,5 +275,5 @@ resource "aws_lambda_permission" "api_gateway_lambda" {
   action        = "lambda:InvokeFunction"
   function_name = data.terraform_remote_state.lambda.outputs.aws_lambda_function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.snackbar_management_management_api.execution_arn}/*/*"
+  source_arn    = "${aws_apigatewayv2_api.snackbar_management_api.execution_arn}/*/*"
 }
