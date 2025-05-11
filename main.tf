@@ -115,7 +115,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_get_users" {
 
 resource "aws_apigatewayv2_route" "api_route_get_users" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "GET /users"
+  route_key = "GET /user"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_users.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -131,7 +131,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_get_user_by_cpf" {
 
 resource "aws_apigatewayv2_route" "api_route_get_user_by_cpf" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "GET /users/cpf/{cpf}"
+  route_key = "GET /user/cpf/{cpf}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_user_by_cpf.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -147,7 +147,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_put_user" {
 
 resource "aws_apigatewayv2_route" "api_route_put_user" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "PUT /users/{id}"
+  route_key = "PUT /user/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_put_user.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -163,7 +163,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_delete_user" {
 
 resource "aws_apigatewayv2_route" "api_route_delete_user" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "DELETE /users/{id}"
+  route_key = "DELETE /user/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_delete_user.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -183,7 +183,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_post_product" {
 
 resource "aws_apigatewayv2_route" "api_route_post_product" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "POST /products"
+  route_key = "POST /product"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_post_product.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -199,7 +199,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_get_products" {
 
 resource "aws_apigatewayv2_route" "api_route_get_products" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "GET /products"
+  route_key = "GET /product"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_products.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -215,7 +215,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_get_product_by_id" 
 
 resource "aws_apigatewayv2_route" "api_route_get_product_by_id" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "GET /products/id/{id}"
+  route_key = "GET /product/id/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_product_by_id.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -231,7 +231,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_get_products_by_cat
 
 resource "aws_apigatewayv2_route" "api_route_get_products_by_category" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "GET /products/category/{category}"
+  route_key = "GET /product/category/{category}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_products_by_category.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -247,7 +247,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_get_product_by_name
 
 resource "aws_apigatewayv2_route" "api_route_get_product_by_name" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "GET /products/name/{name}"
+  route_key = "GET /product/name/{name}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_get_product_by_name.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -263,7 +263,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_put_product" {
 
 resource "aws_apigatewayv2_route" "api_route_put_product" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "PUT /products/id/{id}"
+  route_key = "PUT /product/id/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_put_product.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -279,7 +279,7 @@ resource "aws_apigatewayv2_integration" "snackbar_management_delete_product" {
 
 resource "aws_apigatewayv2_route" "api_route_delete_product" {
   api_id    = aws_apigatewayv2_api.snackbar_management_api.id
-  route_key = "DELETE /products/id/{id}"
+  route_key = "DELETE /product/id/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.snackbar_management_delete_product.id}"
   authorization_type = "CUSTOM"
   authorizer_id = aws_apigatewayv2_authorizer.jwt_auth.id
@@ -287,8 +287,8 @@ resource "aws_apigatewayv2_route" "api_route_delete_product" {
 
 resource "aws_lambda_permission" "api_gateway_lambda" {
   action        = "lambda:InvokeFunction"
-  # function_name = data.terraform_remote_state.lambda.outputs.aws_lambda_function_name
-  function_name = element(split("/", element(split(":", var.lambda_authorizer_invoke_arn), 5)), 1)
+  function_name = data.terraform_remote_state.lambda.outputs.aws_lambda_function_name
+  #function_name = element(split("/", element(split(":", var.lambda_authorizer_invoke_arn), 5)), 1)
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.snackbar_management_api.execution_arn}/*/*"
 }
